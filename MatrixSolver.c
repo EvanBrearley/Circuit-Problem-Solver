@@ -32,7 +32,7 @@ void checkForZeros (int column, int N, double Matrix[N][N+1]){ //ensures there a
             break;
         }
     }
-    //assert(Matrix[column][column] > epsilon || Matrix[column][column] * -1 > epsilon);
+    assert(Matrix[column][column] > epsilon || Matrix[column][column] * -1 > epsilon);
 }
 
 void solveMatrix (double* coefficientMatrix, double* constants, double* solutions, int N){
@@ -51,7 +51,6 @@ void solveMatrix (double* coefficientMatrix, double* constants, double* solution
         for (int j = i+1; j < N; j++){
             if (augmentedMatrix[j][i]){
                 scalarMultiplyRow(i, (-1*augmentedMatrix[j][i]/augmentedMatrix[i][i]), N, augmentedMatrix);
-                printMatrix(N, augmentedMatrix);
                 addRow(j, i, N, augmentedMatrix);
             }
         }  

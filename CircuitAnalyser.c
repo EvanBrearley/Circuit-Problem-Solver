@@ -115,7 +115,7 @@ void KVL() {
     scanf("%d", &knownNum);
     generalElement known[knownNum]; //number of known voltages, rename//
     printf("Enter the two connected nodes, their polarities, and their voltages.\n");
-    for (int i = 0; i < knownNum; i++) {
+    for (int i = 0; i < knownNum; i++) {    
         scanf("%d %d %d %lf", &known[i].node1, &known[i].node2, &known[i].polarity, &known[i].voltage);
     }
 
@@ -253,13 +253,12 @@ void nodeAnalysis() {
         }   
 
         if (analysed) {
-            saveNodeEqn(&nodeVoltage[0], nodenum, i - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
-            analysed = 0;
+            saveNodeEqn(nodenum, i - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
         }
 
         if (!isVoltSource) {
           analyseNode(nodeVoltage, resistor, voltagesource, currentsource, resistorNum, currentNum, voltageNum, i);
-          saveNodeEqn(&nodeVoltage[0], nodenum, i - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
+          saveNodeEqn(nodenum, i - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
         }
 
         for (int j = 0; j < nodenum; j++) {
@@ -277,13 +276,18 @@ void nodeAnalysis() {
                     nodeVoltage[voltagesource[j].node1] = -1;
                 }
                 nodeVoltage[0] = voltagesource[j].voltage; //overwrites potential bug from nodeVoltage 0 getting a value//
-                saveNodeEqn(&nodeVoltage[0], nodenum, voltagesource[j].node2 - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
+                if (analysed){
+                    saveNodeEqn(nodenum, voltagesource[j].node2 - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
+                }
+                else {
+                    saveNodeEqn(nodenum, i - 1, nodeVoltage, (double *)CoefficientMatrix, (double *)y);
+                }
             }
         }
-
-        for (int j = 0; j < nodenum; j++) {
-            nodeVoltage[j] = 0;
-        }
+        analysed = 0;
+    }
+    for (int j = 0; j < nodenum; j++) {
+        nodeVoltage[j] = 0;
     }
     solveMatrix((double *)CoefficientMatrix, (double *)y, (double *)x, nodenum - 1);
 }
@@ -518,7 +522,7 @@ void saveEqn(double *constant, int variableNum, int row, double variable[], doub
     *constant = 0;
 }
 
-void saveNodeEqn(double *constant, int nodeNum, int row, double variable[], double *resultantMatrix, double *constantVector) {
+void saveNodeEqn(int nodeNum, int row, double variable[], double *resultantMatrix, double *constantVector) {
     for (int i = 1; i < nodeNum; i++) {
         resultantMatrix[row * nodeNum - row + i - 1] = variable[i];
         variable[i] = 0;

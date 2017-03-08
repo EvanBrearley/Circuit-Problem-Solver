@@ -18,7 +18,9 @@ void scalarMultiplyRow(int row, double multiplier, int N, double Matrix[N][N+1])
 
 void switchRows (int row1, int row2, int N, double Matrix[N][N+1]){
     for (int i = 0; i <= N; i++){
-        floatSwap(&Matrix[row1][i], &Matrix[row2][i]);
+        double temp = Matrix[row1][i];
+        Matrix[row1][i] = Matrix[row2][i];
+        Matrix[row2][i] = temp;
     }
 }
 
@@ -30,7 +32,7 @@ void checkForZeros (int column, int N, double Matrix[N][N+1]){ //ensures there a
             break;
         }
     }
-    assert(Matrix[column][column] > epsilon || Matrix[column][column] * -1 > epsilon);
+    //assert(Matrix[column][column] > epsilon || Matrix[column][column] * -1 > epsilon);
 }
 
 void solveMatrix (double* coefficientMatrix, double* constants, double* solutions, int N){
@@ -47,16 +49,21 @@ void solveMatrix (double* coefficientMatrix, double* constants, double* solution
     for (int i = 0; i < N; i++){     //loops through coefficients, columns//
         checkForZeros(i, N, augmentedMatrix);
         for (int j = i+1; j < N; j++){
-            scalarMultiplyRow(i, (-1*augmentedMatrix[j][i]/augmentedMatrix[i][i]), N, augmentedMatrix);
-            addRow(j, i, N, augmentedMatrix);
+            if (augmentedMatrix[j][i]){
+                scalarMultiplyRow(i, (-1*augmentedMatrix[j][i]/augmentedMatrix[i][i]), N, augmentedMatrix);
+                printMatrix(N, augmentedMatrix);
+                addRow(j, i, N, augmentedMatrix);
+            }
         }  
     }
     printMatrix(N, augmentedMatrix);
     //Matrix should now be upper diagonal with no zeros on main diagonal, checkForZeros assert would have triggered//
     for (int i = N - 1; i > -1; i--){
         for (int j = i-1; j > -1; j--){
-            scalarMultiplyRow(i, (-1*augmentedMatrix[j][i]/augmentedMatrix[i][i]), N, augmentedMatrix);
-            addRow(j, i, N, augmentedMatrix);
+            if (augmentedMatrix[j][i]){
+                scalarMultiplyRow(i, (-1*augmentedMatrix[j][i]/augmentedMatrix[i][i]), N, augmentedMatrix);
+                addRow(j, i, N, augmentedMatrix);
+            }
         }
     }
     //Should now be diagonal//
@@ -81,10 +88,4 @@ void printMatrix (int N, double Matrix[N][N+1]){
         }
         printf(" | %g]\n", Matrix[i][N]);
     }
-}
-
-void floatSwap (double *a, double *b) {
-    double temp = *a;
-    *a = *b;
-    *b = temp;
 }
